@@ -1,0 +1,17 @@
+.rating-container {
+  display: flex;
+}
+
+.star {
+  color: gold;
+  border: 2px solid gold;
+  margin-right: 2px;
+  border-radius: 4px;
+}
+
+.star-inactive {
+  color: grey;
+  border: 2px solid grey;
+  margin-right: 2px;
+  border-radius: 4px;
+}

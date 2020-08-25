@@ -9,7 +9,7 @@ ion-label {
 }
 
 ion-item h2 {
-  font-weight: 600;
+  font-weight: 600 !important;
   margin: 0;
 }
 
@@ -51,6 +51,11 @@ ion-item ion-note.md {
 
 .dot-unread {
   background: var(--ion-color-primary);
+}
+
+.home-image-thumbnail {
+  border-radius: 4px;
+  color: grey;
 }
 
 ion-footer ion-title {

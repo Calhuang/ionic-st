@@ -1,6 +1,6 @@
-import MessageListItem from '../components/MessageListItem';
+import ReviewListItem from '../components/ReviewListItem';
 import React, { useState } from 'react';
-import { Message, getMessages } from '../data/messages';
+import { getReviews, Review } from '../data/review';
 import {
   IonContent,
   IonHeader,
@@ -10,17 +10,26 @@ import {
   IonRefresherContent,
   IonTitle,
   IonToolbar,
-  useIonViewWillEnter
+  useIonViewWillEnter,
+  IonFab,
+  IonFabButton,
+  IonIcon,
+  IonSearchbar
 } from '@ionic/react';
 import './Home.css';
+import { add } from 'ionicons/icons';
 
 const Home: React.FC = () => {
 
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [filteredReviews, setFilteredReviews] = useState<Review[]>([]);
+  const [searchText, setSearchText] = useState('')
 
-  useIonViewWillEnter(() => {
-    const msgs = getMessages();
-    setMessages(msgs);
+  useIonViewWillEnter(async () => {
+    const msgs = await getReviews();
+    const sorted = msgs.sort((a, b) => Number(b.created_at) - Number(a.created_at))
+    setReviews(sorted);
+    setFilteredReviews(msgs);
   });
 
   const refresh = (e: CustomEvent) => {
@@ -29,13 +38,32 @@ const Home: React.FC = () => {
     }, 3000);
   };
 
+  const onSearchInput = (e: CustomEvent) => {
+    // TODO set debounce
+    let search = e.detail.value
+    setSearchText(search!)
+    let filtered = reviews.filter(item => { 
+      if (
+        (item.location.name.toLowerCase().includes(search.toLowerCase())) ||
+        (item.reviewed_by.toLowerCase().includes(search.toLowerCase())) ||
+        (item.location.city?.toLowerCase().includes(search.toLowerCase())) ||
+        (item.location.state?.toLowerCase().includes(search.toLowerCase())) ||
+        (item.location.zip?.toLowerCase().includes(search.toLowerCase()))
+      ) { 
+        return true
+      }
+    })
+    setFilteredReviews(filtered)
+  }
+
   return (
     <IonPage id="home-page">
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Inbox</IonTitle>
+          <IonTitle>Reviews</IonTitle>
         </IonToolbar>
       </IonHeader>
+      
       <IonContent fullscreen>
         <IonRefresher slot="fixed" onIonRefresh={refresh}>
           <IonRefresherContent></IonRefresherContent>
@@ -44,13 +72,21 @@ const Home: React.FC = () => {
         <IonHeader collapse="condense">
           <IonToolbar>
             <IonTitle size="large">
-              Inbox
+              Reviews
             </IonTitle>
           </IonToolbar>
         </IonHeader>
+        
+        <IonSearchbar value={searchText} onIonChange={e => onSearchInput(e)} animated enterkeyhint="enter"></IonSearchbar>
 
-        <IonList>
-          {messages.map(m => <MessageListItem key={m.id} message={m} />)}
+        <IonFab vertical="bottom" horizontal="end" slot="fixed">
+          <IonFabButton color="secondary" routerLink={`/review/add`}>
+            <IonIcon icon={add} />
+          </IonFabButton>
+        </IonFab>
+
+        <IonList class="ion-padding">
+          {filteredReviews.map((m, index) => <ReviewListItem key={m.reviewed_by + index} review={m} />)}
         </IonList>
       </IonContent>
     </IonPage>
